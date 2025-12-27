@@ -24,72 +24,70 @@ Alpha–Beta (𝛼−𝛽) algorithm is actually an improved minimax using a heu
 When added to a simple minimax algorithm, it gives the same output but cuts off certain branches that can’t possibly affect the final decision — dramatically improving the performance
 
 ## PROGRAM:
-```python
-import math
+```
+import time
+b=[['.']*3 for _ in range(3)]
+turn='X'
 
-def show(b): [print(" | ".join(r)) or print("-"*5) for r in b]
-def win(b):
+def show():[print('|'.join(r))for r in b];print()
+def win():
     for i in range(3):
-        if b[i][0]==b[i][1]==b[i][2]!=" ": return b[i][0]
-        if b[0][i]==b[1][i]==b[2][i]!=" ": return b[0][i]
-    if b[0][0]==b[1][1]==b[2][2]!=" ": return b[0][0]
-    if b[0][2]==b[1][1]==b[2][0]!=" ": return b[0][2]
+        if b[i][0]==b[i][1]==b[i][2] != '.':return b[i][0]
+        if b[0][i]==b[1][i]==b[2][i] != '.':return b[0][i]
+    if b[0][0]==b[1][1]==b[2][2] != '.':return b[0][0]
+    if b[0][2]==b[1][1]==b[2][0] != '.':return b[0][2]
+    return '.' if all(b[i][j]!='.'for i in range(3)for j in range(3))else None
 
-def full(b): return all(c!=" " for r in b for c in r)
-
-def ab(b,a,beta,maxp):
-    w=win(b)
-    if w=="O": return 1
-    if w=="X": return -1
-    if full(b): return 0
-    best=-math.inf if maxp else math.inf
-    for i in range(3):
-        for j in range(3):
-            if b[i][j]==" ":
-                b[i][j]="O" if maxp else "X"
-                val=ab(b,a,beta,not maxp)
-                b[i][j]=" "
-                if maxp:
-                    best=max(best,val); a=max(a,best)
-                else:
-                    best=min(best,val); beta=min(beta,best)
-                if beta<=a: return best
-    return best
-
-def best(b):
-    sc=-math.inf; mv=None
+def maxv(a,beta):
+    r=win()
+    if r=='X':return -1,0,0
+    if r=='O':return 1,0,0
+    if r=='.':return 0,0,0
+    v=-2;x=y=0
     for i in range(3):
         for j in range(3):
-            if b[i][j]==" ":
-                b[i][j]="O"
-                s=ab(b,-math.inf,math.inf,False)
-                b[i][j]=" "
-                if s>sc: sc=s; mv=(i,j)
-    return mv
+            if b[i][j]=='.':
+                b[i][j]='O';m,_,_=minv(a,beta);b[i][j]='.'
+                if m>v:v,x,y=m,i,j
+                if v>=beta:return v,x,y
+                a=max(a,v)
+    return v,x,y
 
-b=[[" "]*3 for _ in range(3)]
-print("You=X | AI=O")
-while True:
-    show(b)
-    w=win(b)
-    if w or full(b): print("Result:",w if w else "Draw!"); break
-    try:
-        r,c=map(int,input("Enter row col (0-2): ").split())
-        if b[r][c]!=" ": print("Invalid!"); continue
-        b[r][c]="X"
-    except: print("Bad input!"); continue
-    if not win(b):
-        m=best(b)
-        if m: b[m[0]][m[1]]="O"
+def minv(a,beta):
+    r=win()
+    if r=='X':return -1,0,0
+    if r=='O':return 1,0,0
+    if r=='.':return 0,0,0
+    v=2;x=y=0
+    for i in range(3):
+        for j in range(3):
+            if b[i][j]=='.':
+                b[i][j]='X';m,_,_=maxv(a,beta);b[i][j]='.'
+                if m<v:v,x,y=m,i,j
+                if v<=a:return v,x,y
+                beta=min(beta,v)
+    return v,x,y
+
+while 1:
+    show();r=win()
+    if r:print('X wins!'if r=='X'else'O wins!'if r=='O'else'Tie!');break
+    if turn=='X':
+        t=time.time();_,x,y=minv(-2,2)
+        print(f"Eval:{round(time.time()-t,4)}s Move:X={x},Y={y}")
+        x,y=int(input("X:")),int(input("Y:"))
+        if 0<=x<3and 0<=y<3and b[x][y]=='.':b[x][y]='X';turn='O'
+        else:print("Invalid!")
+    else:_,x,y=maxv(-2,2);b[x][y]='O';turn='X'
 
 ```
 <hr>
 <h2>INPUT AND OUTPUT:</h2>
 
-<img width="379" height="767" alt="image" src="https://github.com/user-attachments/assets/40b2000d-b62c-4aa9-83e7-bd1182c628d2" />
+<img width="469" height="363" alt="image" src="https://github.com/user-attachments/assets/c792a86a-c895-4258-957d-698eb33e647e" />
 
-<img width="379" height="767" alt="image" src="https://github.com/user-attachments/assets/2cf6ecc1-4955-45c4-b2ce-a770985b1b8d" />
+<img width="430" height="292" alt="image" src="https://github.com/user-attachments/assets/ab4a8805-ace3-4a0e-be4b-029937bed2e7" />
 
+<img width="447" height="317" alt="image" src="https://github.com/user-attachments/assets/7a7174de-e4fe-4eb9-a30f-1a335ae9272c" />
 
 ## RESULT
 We have successfully implemented Alpha-beta pruning of Minimax Search Algorithm for a Simple TIC-TAC-TOE game.
